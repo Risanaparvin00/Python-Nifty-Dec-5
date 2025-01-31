@@ -1,0 +1,25 @@
+import yfinance as yf
+import pandas as pd
+import matplotlib.pyplot as plt
+from statsmodels.tsa.arima.model import ARIMA
+from datetime import datetime, timedelta
+symbol = "^NSEI" 
+start_date = "2010-01-01"
+end_date = datetime.today().strftime('%Y-%m-%d')
+data = yf.download(symbol, start=start_date, end=end_date)
+data = data['Close'].dropna()  
+train_size = int(len(data) * 0.8)
+train_data = data[:train_size]
+test_data = data[train_size:]
+model = ARIMA(train_data, order=(5, 1, 0))  
+model_fit = model.fit()
+forecast_steps = 30
+forecast = model_fit.forecast(steps=forecast_steps)
+print(forecast)
+plt.figure(figsize=(10,6))
+plt.plot(data.index, data, label='Historical Nifty 50')
+plt.plot(test_data.index, test_data, label='Test Data', color='green')
+plt.plot(test_data.index[-forecast_steps:], forecast, label='Forecast', color='red')
+plt.title('Nifty 50 Forecast using ARIMA')
+plt.legend()
+plt.show()
